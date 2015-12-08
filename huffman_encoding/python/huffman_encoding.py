@@ -17,12 +17,18 @@ class Node (object):
 	def __lt__ (self, other):
 		return (self.weight < other.weight);
 
+	def describe (self):
+		print ('Label: %s\tWeight: %d' % (self.label, self.weight));
+
 class HTree (object):
 	def __init__ (self):
 		self.root, self.nodes = None, set ();
+		self.encodings = {};
 
 	def construct (self, frequencies):
 		nodes = [Node (label, frequencies [label], None, None) for label in frequencies] + [Node (None, float ('inf'), None, None)];
+		self.encodings = {label : '' for label in frequencies};
+
 		heapify (nodes);
 
 		x, y = heappop (nodes), heappop (nodes);
@@ -37,10 +43,16 @@ class HTree (object):
 		self.root = x;
 
 	def get_encodings (self):
-		#needs to be implemented
-		if (not self.nodes):
-			return ([]);
-
+		stack, current = [None], self.root;
+		while (current):
+			if (current.right):
+				stack.append (current.right);
+				current = current.left;
+			else:
+				self.encodings [current.label] = '0';
+				current = stack.pop ();
+		return (self.encodings);
+		
 if (__name__ == '__main__'):
 	freq = {
 		'A' : 5,
@@ -54,4 +66,4 @@ if (__name__ == '__main__'):
 
 	huff_tree.construct (freq);
 	encodings = huff_tree.get_encodings ();
-	for char in encodings: print ('%s : %d' % (char, encodings [char]));
+	for char in encodings: print ('%s : %s' % (char, encodings [char]));
